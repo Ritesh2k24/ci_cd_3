@@ -22,22 +22,38 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and Push Docker image
+    # 1. Build the image and load it locally (do not push yet)
+    - name: Build Docker image
       uses: docker/build-push-action@v5
       with:
         context: ./app
-        push: true
+        load: true  # <--- Changed from push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/python-app:${{ github.sha }}
+
+    # 2. Run Trivy to scan the local image
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: '${{ secrets.DOCKER_USERNAME }}/python-app:${{ github.sha }}'
+        format: 'table'
+        exit-code: '1'          # Fail the build if vulnerabilities are found
+        ignore-unfixed: true    # Only report vulnerabilities that have a patch available
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
+
+    # 3. Push the image only if Trivy passes
+    - name: Push Docker image
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/python-app:${{ github.sha }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1
+        aws-region: us-east-1
 
     - name: Update Kubeconfig
-      run: aws eks update-kubeconfig --name python-app-cluster --region ap-south-1
+      run: aws eks update-kubeconfig --name python-app-cluster --region us-east-1
 
     - name: Update image tag in Deployment
       run: |
