@@ -5,7 +5,7 @@ RUN useradd -m appuser
 WORKDIR /home/appuser/app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip wheel>=0.46.2
+RUN pip install --no-cache-dir --upgrade pip wheel>=0.46.2 jaraco.context>=6.1.0
 
 COPY main.py .
 
