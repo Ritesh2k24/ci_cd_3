@@ -5,7 +5,7 @@ data "aws_iam_role" "cluster" {
 
 # EKS Cluster Control Plane
 resource "aws_eks_cluster" "main" {
-  name     = "my-eks-cluster"
+  name     = "python-app-cluster"
   role_arn = data.aws_iam_role.cluster.arn
   version  = "1.35"
 
