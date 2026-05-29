@@ -10,8 +10,8 @@ COPY requirements.txt .
 # Switch to the non-root user BEFORE installing packages
 USER appuser
 
-# Install dependencies directly into the appuser's environment space
-RUN pip install --no-cache-dir --user --upgrade pip wheel>=0.46.2 jaraco.context>=6.1.0 && \
+# ADDED QUOTES HERE around the package strings
+RUN pip install --no-cache-dir --user --upgrade pip "wheel>=0.46.2" "jaraco.context>=6.1.0" && \
     pip install --no-cache-dir --user -r requirements.txt
 
 # Copy the application code
