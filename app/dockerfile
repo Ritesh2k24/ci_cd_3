@@ -1,16 +1,26 @@
 FROM python:3.11-slim
 
-# Create a non-root user
+# Create a non-root user and set up the working directory
 RUN useradd -m appuser
 WORKDIR /home/appuser/app
 
+# Copy the requirements file over first
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip wheel>=0.46.2 jaraco.context>=6.1.0
 
-COPY main.py .
-
-# Switch to non-root user
+# Switch to the non-root user BEFORE installing packages
 USER appuser
 
+# Install dependencies directly into the appuser's environment space
+RUN pip install --no-cache-dir --user --upgrade pip wheel>=0.46.2 jaraco.context>=6.1.0 && \
+    pip install --no-cache-dir --user -r requirements.txt
+
+# Copy the application code
+COPY main.py .
+
+# Expose the Flask execution port
 EXPOSE 5000
+
+# Ensure the user's local bin path is included in the execution pathway
+ENV PATH="/home/appuser/.local/bin:${PATH}"
+
 CMD ["python", "main.py"]
