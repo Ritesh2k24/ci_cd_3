@@ -70,6 +70,16 @@ jobs:
     - name: Update Kubeconfig
       run: aws eks update-kubeconfig --name python-app-cluster --region us-east-1
 
+    - name: Install NGINX Ingress Controller via Helm
+      run: |
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        helm repo update
+        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+          --namespace ingress-nginx \
+          --create-namespace \
+          --atomic \
+          --timeout 5m
+
     - name: Update image tag in Deployment
       run: |
         sed -i "s|YOUR_DOCKERHUB_USERNAME/python-app:latest|${{ secrets.DOCKER_USERNAME }}/python-app:${{ github.sha }}|g" k8s/deployment.yaml
