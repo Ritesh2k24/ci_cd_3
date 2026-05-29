@@ -2,11 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: python-app-svc
+  labels:
+    app: python-app # Crucial: Prometheus looks for this label
 spec:
   type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 5000
+    name: http # Crucial: Give the port a explicit name
   selector:
     app: python-app
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000

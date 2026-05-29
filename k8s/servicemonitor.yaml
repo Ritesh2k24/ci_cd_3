@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: python-app-monitor
+  namespace: monitoring # Must be in the monitoring namespace
+  labels:
+    release: monitoring-stack # Links this monitor to the stack we installed
+spec:
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app: python-app # Finds your Flask service
+  endpoints:
+  - port: http # Targets the named port in your service
+    path: /metrics # Scrapes your custom counter metrics
+    interval: 15s # How often to poll the application
